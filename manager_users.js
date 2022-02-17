@@ -23,7 +23,17 @@ class Manager_users{
 			if(reqord_if_not_reqorded_state.err){res.redirect('/');return}
 			this.set_log_in_cookie(res,google_outh_object['email'])
 			res.redirect('/')
-		})		
+		})
+
+		global.http_server
+		.post('/manager_users/log_out',async(req,res)=>{
+			var cookie_validate_state=this.check_requset_cookie_validat(req)
+			if(!cookie_validate_state){res.end(); return;}
+			var user_log_in_state=this.check_user_log_in_state(req.cookies['outh_token'])
+			if(!user_log_in_state){res.end(); return;}
+			this.set_log_out_cookie(res)
+			res.json({logout_state:true})
+		})	
 	}
 
 	async get_google_outh_object_from_req(req){
@@ -41,6 +51,21 @@ class Manager_users{
 		}catch(err){
 			res(false)
 		}
+	}
+
+	check_requset_cookie_validat(req){
+		if(!req.cookies){return {state:false}}
+		if(!req.cookies['outh_token']){return {state:false}}
+		return {state:true}
+	}
+
+	check_user_log_in_state(outh_token){
+		try{
+			var decode=jwt.verify(outh_token, 'shhhhh');
+			return decode['log_in_state']
+		}catch(err){
+			return false
+		}	
 	}
 
 	async reqord_user_if_not_reqorded(google_outh_object){
@@ -70,7 +95,19 @@ class Manager_users{
 	    }
 	    var token = jwt.sign(outh_object, 'shhhhh');
 	    res.cookie('outh_token', token, options) 
-	}	
+	}
+
+	set_log_out_cookie(res){
+	    var options = {
+	        maxAge: 10000 * 60 * 15, // would expire after 15 minutes
+	        httpOnly: true // The cookie only accessible by the web server
+	    }
+	    var outh_object={
+	    	log_in_state: false,
+	    }
+	    var token = jwt.sign(outh_object, 'shhhhh');
+	    res.cookie('outh_token', token, options) 
+	}			
 
     delay(time){
         return new Promise((res,rej)=>{

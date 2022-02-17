@@ -35,7 +35,6 @@ class Sign_in{
 	}
 
 	check_sign_in_object_validate(sign_in_object){
-		console.log(sign_in_object)
 		if(!sign_in_object){return{state:false,resone:'sometheng went rong'}}
 		if(!sign_in_object['email']){return{state:false,resone:'sometheng went rong'}}
 		if(!sign_in_object['password']){return{state:false,resone:'sometheng went rong'}}

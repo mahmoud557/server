@@ -39,9 +39,6 @@ class Sign_Up{
 	}
 
 
-	parse_google_token_id(token_id){
-
-	}
 
 	check_sign_up_object_validate(sign_up_object){
 		if(!sign_up_object){return {valid:false,resone:'Empty Data'}}
