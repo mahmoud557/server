@@ -86,8 +86,17 @@ class Sign_Up{
 	}
 
 	async add_new_user(sign_up_object){
+		console.log(sign_up_object)
 		var password_hash=passwordHash.generate(sign_up_object['password']);
-		var user_opject={email:sign_up_object['email'],password:password_hash};
+		var user_opject={
+			email:sign_up_object['email'],
+			password_hash:password_hash,
+			username:sign_up_object['email'],
+			picture:null,
+			palance:0,
+			order_list:[],
+			download_list:[]			
+		};
 		var add_state=await manager_db.add_new_user(user_opject)
 		if(add_state.result){return true}else{return false}
 	}

@@ -76,7 +76,10 @@ class Manager_users{
 				var user_opject={
 					email:google_outh_object['email'],
 					username:google_outh_object['given_name'],
-					picture:google_outh_object['picture']
+					picture:google_outh_object['picture'],
+					palance:0,
+					order_list:[],
+					download_list:[]
 				};
 				var add_state=await manager_db.add_new_user(user_opject)
 				if(add_state.result){return true}else{return {err:true}}
