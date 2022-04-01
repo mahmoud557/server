@@ -33,7 +33,7 @@ class Manager_Dashboard{
 				var account_data={
 					email:user['email'],
 					username:user['username'],
-					picture:user['picture'],
+					picture:user['picture']||'icons/user3.svg',
 					palance:user['palance'],
 					order_list:order_list,
 					download_list:user['download_list']

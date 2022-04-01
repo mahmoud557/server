@@ -1,5 +1,7 @@
 class Manager_users{
 	constructor(props) {
+		this.reseat_password_key='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im1hN21vdWR4eXpAZ21haWwuY29tIiwicGFzc3dvcmQiOiJ2dnZ2dnYiLCJpYXQiOjE2NDI1Nzg3OTB9.2g0G3Is9o597RDPKN-Sv2kZqZTg9qs-0loxIDAwMhaw'
+		this.reseat_password_url='http://localhost:3000/manager_users/reseat_password/verification/'
 		this.start()
 	}
 
@@ -34,7 +36,119 @@ class Manager_users{
 			this.set_log_out_cookie(res)
 			res.json({logout_state:true})
 		})	
+
+		global.http_server
+		.post('/manager_users/forget_password',async(req,res)=>{
+			if(!req.body){return}
+			var cheek_state=this.check_forget_password_object_validate(req.body);
+			if(!cheek_state.valid){return res.end()}
+			var cheek_if_email_exest_state=await this.cheek_if_email_exest(req.body.email);
+			if(cheek_if_email_exest_state.err){return res.json({state:false,resone:'Server Error'})}			
+			if(cheek_if_email_exest_state.result==false){return res.json({state:false,resone:'Ronge Email'})}		
+			var ip=req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+			var reseat_password_url=this.create_reseat_password_url(req.body['email'],ip)
+			var send_state=await this.send_reseat_password_url_to_email(req.body['email'],reseat_password_url)
+			res.json({state:true});
+		})
+
+		global.http_server
+		.get('/manager_users/reseat_password/verification/:token/:email',async(req,res)=>{
+			res.sendFile(path.join(__dirname, 'app/home/index.html')); 
+		})
+
+		global.http_server
+		.post('/manager_users/reseat_password',async(req,res)=>{
+			if(!req.body){return}
+			var cheek_state=this.check_reseat_password_object_validate(req.body);
+			if(!cheek_state.valid){return res.end()}
+			var token_cheek_state=this.cheek_reseat_password_token_validate(req)
+			if(!token_cheek_state){return res.json({state:false,resone:'unvalid token'})}
+			var reseat_password_state=await this.reseat_password(req)
+			if(!reseat_password_state){return res.json({state:false,resone:'server error'})}
+			res.json({state:true});
+		})						
 	}
+
+	check_forget_password_object_validate(forget_password_object){
+		if(!forget_password_object){return {valid:false,resone:'Empty Data'}}
+		if(!forget_password_object['email']){return {valid:false,resone:'Empty Email'}}
+		if(forget_password_object['email']==''){return {valid:false,resone:'Empty Email'}}
+		if(forget_password_object['email']==' '){return {valid:false,resone:'Empty Email'}}
+		if(forget_password_object['email'].length>320){return {valid:false,resone:'To Large Email'}}
+		if(!/\S+@\S+\.\S+/.test(forget_password_object['email'])){return {valid:false,resone:'Unvalid Email Address'}}		
+		return {valid:true}
+	}
+
+	check_reseat_password_object_validate(forget_password_object){
+		if(!forget_password_object){return {valid:false,resone:'Empty Data'}}
+		if(!forget_password_object['password']){return {valid:false,resone:'Empty password'}}
+		if(!forget_password_object['re_password']){return {valid:false,resone:'Empty re_password'}}			
+		if(!forget_password_object['email']){return {valid:false,resone:'Empty Email'}}
+		if(!forget_password_object['token']){return {valid:false,resone:'Empty token'}}
+		if(forget_password_object['email']==''){return {valid:false,resone:'Empty Email'}}
+		if(forget_password_object['email']==' '){return {valid:false,resone:'Empty Email'}}
+		if(forget_password_object['email'].length>320){return {valid:false,resone:'To Large Email'}}
+		if(!/\S+@\S+\.\S+/.test(forget_password_object['email'])){return {valid:false,resone:'Unvalid Email Address'}}		
+		if(forget_password_object['password']==''){return {valid:false,resone:'Empty password'}}
+		if(forget_password_object['password']==' '){return {valid:false,resone:'Empty password'}}		
+		if(forget_password_object['password'].length<=4){return {valid:false,resone:'Password Shoude Be More Than 4 Leters'}}	
+		if(forget_password_object['password'].length>40){return {valid:false,resone:'Password Shoude Be less Than 40 Leters'}}	
+		if(forget_password_object['password']!=forget_password_object['re_password']){return {valid:false,resone:'Passwords did nnot match'}}		
+		if(forget_password_object['token']==''){return {valid:false,resone:'Empty token'}}
+		if(forget_password_object['token']==' '){return {valid:false,resone:'Empty token'}}		
+		if(forget_password_object['token'].length<=4){return {valid:false,resone:'token Shoude Be More Than 4 Leters'}}	
+		//if(forget_password_object['token'].length>100){return {valid:false,resone:'Password Shoude Be less Than 40 Leters'}}			
+		return {valid:true}
+	}
+
+	async reseat_password(req){
+		var email=req['body']['email'];
+		var password=req['body']['password'];
+		var password_hash=passwordHash.generate(password);
+		var update_qurey=await manager_db.update_user_password_by_email(email,password_hash)
+		if(update_qurey.result==false){return false}
+		if(update_qurey.err==true){return false}
+		return true
+	}
+
+
+	cheek_reseat_password_token_validate(req){
+		var ip=req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+		var token_paylod=this.parse_reseat_password_token(req['body']['token']);
+		if(!token_paylod['email']){return false}
+		if(!token_paylod['ip']){return false}
+		if(token_paylod['email']!=req['body']['email']){return false}
+		if(token_paylod['ip']!=ip){return false}
+		return true;
+	}
+
+	async cheek_if_email_exest(email){
+		var quiry=await manager_db.get_user_by_email(email);
+		if(quiry.err){return {err:true}}
+		if(quiry.result==null){return {err:false,result:false}}
+		if(quiry.result){return {err:false,result:true}}
+	}
+
+	create_reseat_password_url(email,ip){
+		var token = jwt.sign({ email: email, ip:ip }, this.reseat_password_key, { expiresIn: 4 * 60 });
+		var reseat_password_url=`${this.reseat_password_url}${token}/${email}#reseat_password`
+		return reseat_password_url
+	}
+
+	async send_reseat_password_url_to_email(email,reseat_password_url){
+		const mailOptions = {
+		 from: "Graficy <man389@zohomail.com>", // sender address
+		 to: email,
+		 subject: "Graficy Reseat Password Url", // Subject line
+		 html: `
+			 	<h1>Welcome To Graficy</h1>
+			 	<h2>that is your Reseat Password Link</h2>
+			 	<a href=${reseat_password_url}>${reseat_password_url}</a>
+		 `
+		};	
+		var send_state=await transporter.sendMail(mailOptions);
+		console.log(send_state)
+	}	
 
 	async get_google_outh_object_from_req(req){
 		try{
@@ -63,6 +177,15 @@ class Manager_users{
 		try{
 			var decode=jwt.verify(outh_token, 'shhhhh');
 			return decode['log_in_state']
+		}catch(err){
+			return false
+		}	
+	}
+
+	parse_reseat_password_token(token){
+		try{
+			var decode=jwt.verify(token, this.reseat_password_key);
+			return decode
 		}catch(err){
 			return false
 		}	

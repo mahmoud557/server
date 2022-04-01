@@ -1,3 +1,5 @@
+var { uuid } = require('uuidv4');
+global.uuid=uuid;
 global.cookieParser = require('cookie-parser');
 global.jwt = require('jsonwebtoken');
 global.fetch = require('node-fetch');
@@ -50,21 +52,15 @@ class Manager_Main{
 			res.redirect('/authed'); return
 		})
 
-		global.http_server.post('/get_url_info',async(req,res)=>{
-			var url_info=await manager_get_stocks.get_url_info(req.body.url);
-			res.json(url_info)
-		})
-
 		global.http_server.get('/authed',async(req,res)=>{
 			var cookie_validate_state=this.check_requset_cookie_validat(req);
 			if(!cookie_validate_state['state']){res.redirect('/'); return}
 			var log_in_state=await this.check_user_log_in_state(req.cookies['outh_token'])
 			if(!log_in_state){res.redirect('/'); return}
-			res.sendFile(path.join(__dirname, 'app/home/index.html')); return
+			res.sendFile(path.join(__dirname, 'app/home/index.html')); 
 		})
 
 		global.http_server.post('/get_account_picture',async(req,res)=>{
-			console.log('hit')
 			var cookie_validate_state=this.check_requset_cookie_validat(req);
 			if(!cookie_validate_state['state']){return res.end()}
 			var log_in_state=await this.check_user_log_in_state(req.cookies['outh_token'])
@@ -73,7 +69,7 @@ class Manager_Main{
 			if(!email){return res.end()}
 			var get_picture_qurye=await global.manager_db.get_user_picture_by_email(email)
 			if(get_picture_qurye.err){return res.end()}
-			var picture=get_picture_qurye.result||'test photo';
+			var picture=get_picture_qurye.result||'home/icons/user3.svg';
 			res.json({err:false,result:picture})
 		})	
 

@@ -25,6 +25,9 @@
     "node-fetch": "^2.6.6",
     "nodemailer": "^6.7.2",
     "password-hash": "^1.2.2",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "underscore": "^1.13.2",
+    "uuid": "^8.3.2",
+    "uuidv4": "^6.2.12"
   }
 }
