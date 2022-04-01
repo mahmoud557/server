@@ -1,6 +1,6 @@
 class Manager_Get_Stocks{
 	constructor(props) {
-		this.auth='eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczpcL1wvZ2V0c3RvY2tzLm5ldFwvYXBpXC9hdXRoXC9sb2dpbiIsImlhdCI6MTY0NDk3MDc2MCwibmJmIjoxNjQ0OTcwNzYwLCJqdGkiOiI1TzAyMFp2Wkk3ajNCYWpLIiwic3ViIjoyNzk5LCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.AX6n8xko7w_RixAzrYC4uoqaGNk0dFaWOlx2aSkcsI8'
+		this.auth=process.env.get_stocks_auth;
 		this.media_path='./media/';
 		this.start()
 	}
