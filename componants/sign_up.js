@@ -1,7 +1,7 @@
 class Sign_Up{
 	constructor(props) {
 		this.verification_key='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im1hN21vdWR4eXpAZ21haWwuY29tIiwicGFzc3dvcmQiOiJ2dnZ2dnYiLCJpYXQiOjE2NDI1Nzg3OTB9.2g0G3Is9o597RDPKN-Sv2kZqZTg9qs-0loxIDAwMhaw'
-		this.verification_url='http://localhost:3000/sign_up/verification/'
+		this.verification_url='https://grafeeky.glitch.me//sign_up/verification/'
 		this.start()
 	}
 
