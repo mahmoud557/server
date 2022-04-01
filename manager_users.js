@@ -1,7 +1,7 @@
 class Manager_users{
 	constructor(props) {
 		this.reseat_password_key='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im1hN21vdWR4eXpAZ21haWwuY29tIiwicGFzc3dvcmQiOiJ2dnZ2dnYiLCJpYXQiOjE2NDI1Nzg3OTB9.2g0G3Is9o597RDPKN-Sv2kZqZTg9qs-0loxIDAwMhaw'
-		this.reseat_password_url='http://localhost:3000/manager_users/reseat_password/verification/'
+		this.reseat_password_url='https://grafeeky.glitch.me/manager_users/reseat_password/verification/'
 		this.start()
 	}
 
